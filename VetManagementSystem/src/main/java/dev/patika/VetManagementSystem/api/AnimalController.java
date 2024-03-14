@@ -38,7 +38,7 @@ public class AnimalController {
     public ResultData<AnimalResponse> save(@RequestBody @Valid AnimalSaveRequest animal) {
         Optional<Animal> isAnimalExist = animalService.findByNameAndSpeciesAndBreed(animal.getName(), animal.getSpecies(), animal.getBreed());
         if (isAnimalExist.isPresent()) {
-            return ResultHelper.failWithData(new AnimalResponse());
+            return ResultHelper.failData();
         } else {
             Animal savedAnimal = this.modelMapper.forRequest().map(animal, Animal.class);
             this.animalService.save(savedAnimal);
