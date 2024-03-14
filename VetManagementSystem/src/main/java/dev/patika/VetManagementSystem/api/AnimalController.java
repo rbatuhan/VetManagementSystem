@@ -9,8 +9,10 @@ import dev.patika.VetManagementSystem.dto.request.Animal.AnimalSaveRequest;
 import dev.patika.VetManagementSystem.dto.request.Animal.AnimalUpdateRequest;
 import dev.patika.VetManagementSystem.dto.response.AnimalResponse;
 import dev.patika.VetManagementSystem.dto.response.AvailableDateResponse;
+import dev.patika.VetManagementSystem.dto.response.VaccineResponse;
 import dev.patika.VetManagementSystem.entities.Animal;
 import dev.patika.VetManagementSystem.entities.Customer;
+import dev.patika.VetManagementSystem.entities.Vaccine;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -33,15 +35,15 @@ public class AnimalController {
     // // Değerlendirme Formu 12 - Hayvan Kayıt Etme.
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResultData<Animal> save(@RequestBody @Valid Animal animal) {
+    public ResultData<AnimalResponse> save(@RequestBody @Valid AnimalSaveRequest animal) {
         Optional<Animal> isAnimalExist = animalService.findByNameAndSpeciesAndBreed(animal.getName(), animal.getSpecies(), animal.getBreed());
         if (isAnimalExist.isPresent()) {
-            return ResultHelper.failWithData(animal);
+            return ResultHelper.failWithData(new AnimalResponse());
         } else {
-            Customer customer = animalService.getCustomerByCustomerId(animal.getCustomer().getId());
-            Animal savedAnimal = animalService.save(animal);
-            savedAnimal.setCustomer(customer);
-            return ResultHelper.created(savedAnimal);
+            Animal savedAnimal = this.modelMapper.forRequest().map(animal, Animal.class);
+            this.animalService.save(savedAnimal);
+            AnimalResponse saved = this.modelMapper.forResponse().map(savedAnimal, AnimalResponse.class);
+            return ResultHelper.created(saved);
         }
     }
 
