@@ -2,6 +2,8 @@ package dev.patika.VetManagementSystem.dao;
 
 import dev.patika.VetManagementSystem.entities.Animal;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,7 +16,8 @@ public interface AnimalRepo extends JpaRepository<Animal, Long> {
     List<Animal> findByCustomerId(long customerId);
 
     // Belirli bir isimle hayvanları bulur
-    List<Animal> findByName(String name);
+    @Query("SELECT a FROM Animal a WHERE lower(a.name) LIKE lower(concat('%', :name, '%'))")
+    List<Animal> findByName(@Param("name") String name);
 
     // Belirli bir kimlik numarasına sahip hayvanın varlığını kontrol eder
     boolean existsById(long id);
