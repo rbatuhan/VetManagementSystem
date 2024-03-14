@@ -8,4 +8,5 @@ public class Msg {
     public static final String NOT_AVB= "Kullanıcı Uygun Değil !!";
     public static final String FAIL = "GÜNCELLEME BAŞARISIZ";
     public static final String FOUND = "DAHA ÖNCE OLUŞTURULMUŞ !";
+    public static final String VACCINE_PROTECTION_DATE_NOT_ARRIVED = "İlgili aşının koruyuculuk süresi bu pet için devam etmektedir.";
 }

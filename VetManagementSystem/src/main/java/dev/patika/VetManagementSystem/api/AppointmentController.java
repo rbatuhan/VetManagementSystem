@@ -95,18 +95,16 @@ public class AppointmentController {
     }
 
     // Değerlendirme Formu 20 - Randevular Girilen Doktor İd ye ve Tarihe Göre Filtreleme
-    @GetMapping("/get/doctor-date/{doctorId}/{date}")
+    @GetMapping("/get/doctor-date/{doctorId}/{startDate}/{endDate}")
     @ResponseStatus(HttpStatus.OK)
     public ResultData<List<AppointmentResponse>> findAllByDoctorAndDate(
             @PathVariable long doctorId,
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+            @PathVariable("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime startDate,
+            @PathVariable("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime endDate) {
         // Belirli bir doktorun belirli bir tarihte yapılacak randevuları getir
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
-
         List<AppointmentResponse> responseList = appointmentService.getAppointmentsByDateAndDoctor(
-                        startOfDay,
-                        endOfDay,
+                        startDate,
+                        endDate,
                         doctorId)
                 .stream()
                 .map(appointment -> modelMapper.forResponse().map(appointment, AppointmentResponse.class))
@@ -115,16 +113,14 @@ public class AppointmentController {
     }
 
     // Değerlendirme Formu 19 - Randevular Girilen Hayvan İd ye ve Tarihe Göre Filtreleme
-    @GetMapping("/get/animal-date/{animalId}/{date}")
+    @GetMapping("/get/animal-date/{animalId}/{startDate}/{endDate}")
     @ResponseStatus(HttpStatus.OK)
     public ResultData<List<Appointment >> findAllByAnimalAndDate(
             @PathVariable long animalId,
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+            @PathVariable("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime startDate,
+            @PathVariable("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime endDate)  {
         // Belirli bir hayvanın belirli bir tarihte yapılacak randevuları getir
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
-
-        List<Appointment> responseList = appointmentService.getAppointmentsByDateAndAnimalId(startOfDay,endOfDay,animalId)
+        List<Appointment> responseList = appointmentService.getAppointmentsByDateAndAnimalId(startDate,endDate,animalId)
                 .stream()
                 .map(appointment -> modelMapper.forResponse().map(appointment, Appointment.class))
                 .collect(Collectors.toList());

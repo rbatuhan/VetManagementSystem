@@ -44,4 +44,8 @@ public class ResultHelper {
     public static <T>ResultData<T> fail(T data) {
         return new ResultData<>(false, Msg.FAIL, "404", data);
     }
+
+    public static <T> ResultData<T> vaccineProtectionDateNotArrived() {
+        return new ResultData<>(false, Msg.VACCINE_PROTECTION_DATE_NOT_ARRIVED, "422", null);
+    }
 }

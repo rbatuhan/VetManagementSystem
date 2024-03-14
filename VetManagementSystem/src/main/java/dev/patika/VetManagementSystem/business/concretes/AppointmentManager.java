@@ -1,5 +1,6 @@
 package dev.patika.VetManagementSystem.business.concretes;
 
+import dev.patika.VetManagementSystem.business.abstracts.IAnimalService;
 import dev.patika.VetManagementSystem.business.abstracts.IAppointmentService;
 import dev.patika.VetManagementSystem.business.abstracts.IDoctorService;
 import dev.patika.VetManagementSystem.core.config.modelMapper.IModelMapperService;
@@ -26,12 +27,14 @@ public class AppointmentManager implements IAppointmentService {
 
     private final AppointmentRepo appointmentRepo;
     private final IDoctorService doctorService;
+    private final IAnimalService animalService;
 
     // Bağımlılıkları enjekte eden bir constructor
-    public AppointmentManager(IModelMapperService modelMapper, AppointmentRepo appointmentRepo, IDoctorService doctorService) {
+    public AppointmentManager(IModelMapperService modelMapper, AppointmentRepo appointmentRepo, IDoctorService doctorService, IAnimalService animalService) {
         this.modelMapper = modelMapper;
         this.appointmentRepo = appointmentRepo;
         this.doctorService = doctorService;
+        this.animalService = animalService;
     }
 
     @Override
@@ -99,18 +102,17 @@ public class AppointmentManager implements IAppointmentService {
     }
 
     @Override
-    public List<AppointmentResponse> getAppointmentsByDateAndAnimalId(LocalDateTime startDate, LocalDateTime endDate, long animalId) {
+    public List<Appointment> getAppointmentsByDateAndAnimalId(LocalDateTime startDate, LocalDateTime endDate, long animalId) {
         // Belirli bir tarih aralığında belirli bir hayvana ait randevuları alır
-        List<Appointment> appointments = appointmentRepo.findByAnimalIdAndDateTimeBetween(
-                animalId,
-                startDate,
-                endDate
+        Animal animal = animalService.getById(animalId);
+        if (animal == null) {
+            throw new RuntimeException("Hayvan bulunamadı!");
+        }
+       return appointmentRepo.findByAnimalIdAndDateTimeBetween(
+               animal.getId(),
+               startDate,
+               endDate
         );
-
-        return appointments.stream()
-                .filter(appointment -> startDate.isBefore(appointment.getAppointmentDate()) && endDate.isAfter(appointment.getAppointmentDate()))
-                .map(appointment -> modelMapper.forResponse().map(appointment, AppointmentResponse.class))
-                .collect(Collectors.toList());
     }
 
     // Çakışan randevuları kontrol eder
@@ -118,6 +120,7 @@ public class AppointmentManager implements IAppointmentService {
         if (newAppointment.getDoctor() != null) {
             List<Appointment> conflictingAppointments = appointmentRepo.findConflictingAppointmentsForDoctor(
                     newAppointment.getDoctor().getId(),
+                    newAppointment.getAppointmentDate(),
                     newAppointment.getAppointmentDate()
             );
 

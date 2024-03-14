@@ -1,18 +1,24 @@
 package dev.patika.VetManagementSystem.business.abstracts;
 
+import dev.patika.VetManagementSystem.core.result.ResultData;
 import dev.patika.VetManagementSystem.dto.request.Vaccine.VaccineSaveRequest;
 import dev.patika.VetManagementSystem.dto.request.Vaccine.VaccineUpdateRequest;
 import dev.patika.VetManagementSystem.dto.response.AnimalResponse;
+import dev.patika.VetManagementSystem.dto.response.VaccineResponse;
 import dev.patika.VetManagementSystem.entities.Vaccine;
 import jakarta.validation.Valid;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface IVaccineService {
 
-    // Yeni bir aşıyı kaydeder
+    List<Vaccine> findByNameAndCode(String name, String code);
+
+//      <<<<<<---------->>>>>
+     //Yeni bir aşıyı kaydeder
     Vaccine save(Vaccine vaccine);
 
     // Belirli bir isme sahip aşıyı alır
@@ -41,7 +47,9 @@ public interface IVaccineService {
     List<Vaccine> getVaccinesWithUpcomingVaccinations(LocalDate startDate, LocalDate endDate);
 
     // Belirli bir isim ve kodla eşleşen aşıyı bulur
-    Optional<Vaccine> findByNameAndCode(String name, String code);
+    List<Vaccine> findByNameAndCodeAndAnimalId(String name, String code, Long animalId);
+
+
 
     // Belirli bir tarih aralığında gelecek aşıları olan hayvanları alır
     List<AnimalResponse> getAnimalsWithUpcomingVaccinations(LocalDate startDate, LocalDate endDate);

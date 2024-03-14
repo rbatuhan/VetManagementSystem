@@ -6,6 +6,7 @@ import dev.patika.VetManagementSystem.dto.response.AppointmentResponse;
 import dev.patika.VetManagementSystem.entities.Appointment;
 import dev.patika.VetManagementSystem.entities.Doctor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,9 +29,9 @@ public interface IAppointmentService {
     Doctor getDoctorById(long id);
 
     // Belirli bir tarih aralığında ve doktor kimliğine sahip randevuları alır
-    List<Appointment> getAppointmentsByDateAndDoctor(LocalDateTime appointmentDate, LocalDateTime endOfDay, long doctorId);
+    List<Appointment> getAppointmentsByDateAndDoctor(LocalDateTime startDate, LocalDateTime endDate, long doctorId);
 
     // Belirli bir tarih aralığında ve hayvan kimliğine sahip randevuları alır
-    List<AppointmentResponse> getAppointmentsByDateAndAnimalId(LocalDateTime dateTime, LocalDateTime endOfDay, long animalId);
+    List<Appointment> getAppointmentsByDateAndAnimalId(LocalDateTime startDate, LocalDateTime endDate, long animalId);
 
 }

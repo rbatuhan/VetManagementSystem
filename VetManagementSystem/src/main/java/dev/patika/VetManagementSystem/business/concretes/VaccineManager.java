@@ -1,36 +1,50 @@
 package dev.patika.VetManagementSystem.business.concretes;
 
 import dev.patika.VetManagementSystem.business.abstracts.IVaccineService;
+import dev.patika.VetManagementSystem.core.config.modelMapper.IModelMapperService;
 import dev.patika.VetManagementSystem.core.exception.NotFoundException;
+import dev.patika.VetManagementSystem.core.result.ResultData;
 import dev.patika.VetManagementSystem.core.utiles.Msg;
+import dev.patika.VetManagementSystem.core.utiles.ResultHelper;
 import dev.patika.VetManagementSystem.dao.VaccineRepo;
 import dev.patika.VetManagementSystem.dto.request.Vaccine.VaccineSaveRequest;
 import dev.patika.VetManagementSystem.dto.request.Vaccine.VaccineUpdateRequest;
 import dev.patika.VetManagementSystem.dto.response.AnimalResponse;
+import dev.patika.VetManagementSystem.dto.response.VaccineResponse;
 import dev.patika.VetManagementSystem.entities.Animal;
 import dev.patika.VetManagementSystem.entities.Vaccine;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class VaccineManager implements IVaccineService {
-
     private final VaccineRepo vaccineRepo;
+    private final EntityManager entityManager;
 
-    public VaccineManager(VaccineRepo vaccineRepo) {
+    public VaccineManager(VaccineRepo vaccineRepo, EntityManager entityManager) {
         this.vaccineRepo = vaccineRepo;
+        this.entityManager = entityManager;
     }
 
+
+//      <<<<-------->>>>>
     @Override
     public Vaccine save(Vaccine vaccine) {
         // Aşıyı kaydeder
         return this.vaccineRepo.save(vaccine);
     }
+
 
     @Override
     public Vaccine get(String name) {
@@ -98,10 +112,15 @@ public class VaccineManager implements IVaccineService {
     }
 
     @Override
-    public Optional<Vaccine> findByNameAndCode(String name, String code) {
+    public List<Vaccine> findByNameAndCodeAndAnimalId(String name, String code, Long animalId) {
+        // Belirli bir isme ve koda sahip aşıyı döndürür
+        return vaccineRepo.findByNameAndCodeAndAnimalId(name, code, animalId);
+    }
+
+    @Override
+    public List<Vaccine> findByNameAndCode(String name, String code) {
         // Belirli bir isme ve koda sahip aşıyı döndürür
         return vaccineRepo.findByNameAndCode(name, code);
-
     }
 
     @Override

@@ -4,6 +4,7 @@ import dev.patika.VetManagementSystem.business.abstracts.IVaccineService;
 import dev.patika.VetManagementSystem.core.config.modelMapper.IModelMapperService;
 import dev.patika.VetManagementSystem.core.result.ResultData;
 import dev.patika.VetManagementSystem.core.utiles.ResultHelper;
+import dev.patika.VetManagementSystem.dao.VaccineRepo;
 import dev.patika.VetManagementSystem.dto.request.Vaccine.VaccineSaveRequest;
 import dev.patika.VetManagementSystem.dto.request.Vaccine.VaccineUpdateRequest;
 import dev.patika.VetManagementSystem.dto.response.VaccineResponse;
@@ -24,46 +25,47 @@ public class VaccineController {
 
     private final IVaccineService vaccineService;
     private final IModelMapperService modelMapper;
+    private final VaccineRepo vaccineRepo;
 
-    public VaccineController(IVaccineService vaccineService, IModelMapperService modelMapper) {
+    public VaccineController(IVaccineService vaccineService, IModelMapperService modelMapper, VaccineRepo vaccineRepo) {
         this.vaccineService = vaccineService;
         this.modelMapper = modelMapper;
+        this.vaccineRepo = vaccineRepo;
     }
 
-    // Değerlendirme Formu 21 - Aşı Kayıt Etme
+//      <<<------->>>>
+     //Değerlendirme Formu 21 - Aşı Kayıt Etme
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public ResultData<VaccineResponse> save(@RequestBody @Valid VaccineSaveRequest request) {
         // Aşıyı kaydet
-        Optional<Vaccine> vaccineOptional=vaccineService.findByNameAndCode(request.getName(),request.getCode());
-        VaccineResponse savedVac = this.modelMapper.forResponse().map(request, VaccineResponse.class);
-        if (vaccineOptional.isPresent()) {
-            // Eğer aşı zaten mevcutsa, başarısızlıkla sonuçlanan bir cevap döndür
-            return ResultHelper.failWithData(savedVac);
-        } else {
+        List<Vaccine> vaccineList=vaccineService.findByNameAndCodeAndAnimalId(request.getName(),request.getCode(), request.getAnimal().getId());
+        for (Vaccine vaccine: vaccineList){
+            if (vaccine.getProtectionFinishDate().isAfter(request.getProtectionStartDate())){
+                return ResultHelper.vaccineProtectionDateNotArrived();
+            }
+        }
             // Aşıyı kaydet
             Vaccine saveVaccine = this.modelMapper.forRequest().map(request, Vaccine.class);
             this.vaccineService.save(saveVaccine);
             VaccineResponse saved = this.modelMapper.forResponse().map(saveVaccine, VaccineResponse.class);
             // Başarıyla kaydedildiğine dair bir cevap döndür
             return ResultHelper.created(saved);
-        }
     }
 
     @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResultData<VaccineResponse> update(@PathVariable("id") long id, @RequestBody @Valid VaccineUpdateRequest vaccineUpdateRequest) {
         // Aşıyı güncelle
-        Optional<Vaccine> existingVaccineOptional = vaccineService.findByNameAndCode(vaccineUpdateRequest.getName(), vaccineUpdateRequest.getCode());
+        List<Vaccine> existingVaccineOptional = vaccineService.findByNameAndCode(vaccineUpdateRequest.getName(), vaccineUpdateRequest.getCode());
 
         VaccineResponse vaccineResponse = null;
-        if (existingVaccineOptional.isPresent()) {
+        if (!existingVaccineOptional.isEmpty()) {
+            return ResultHelper.fail(vaccineResponse);
+        } else {
             Vaccine updateVaccine = this.vaccineService.update(id, vaccineUpdateRequest);
             vaccineResponse = this.modelMapper.forResponse().map(updateVaccine, VaccineResponse.class);
             return ResultHelper.success(vaccineResponse);
-
-        } else {
-            return ResultHelper.fail(vaccineResponse);
         }
     }
 
@@ -74,7 +76,7 @@ public class VaccineController {
         // Aşıyı sil
         Vaccine deleteVaccine = this.vaccineService.deleteById(id);
         VaccineResponse vaccineResponse = null;
-        if (deleteVaccine==null) {
+        if (deleteVaccine == null) {
             vaccineResponse = this.modelMapper.forResponse().map(deleteVaccine, VaccineResponse.class);
             return ResultHelper.notFound(vaccineResponse);
         } else {
